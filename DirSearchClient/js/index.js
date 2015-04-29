@@ -17,11 +17,7 @@
  * under the License.
  */
 
-var authority = "https://login.windows.net/common",
-    redirectUri = "http://MyDirectorySearcherApp",
-    resourceUri = "https://graph.windows.net",
-    clientId = "a5d92493-ae5a-4a9f-bcbf-9f1d354067d3",
-    graphApiVersion = "2013-11-08";
+// TODO: Add the configuration values for your Azure AD application.
 
 var app = {
     // Invoked when Cordova is fully loaded.
@@ -37,49 +33,11 @@ var app = {
             app.requestData(authresult, searchText);
         });
     },
-    // Shows user authentication dialog if required.
-    authenticate: function (authCompletedCallback) {
+    
+    // TODO: Make a token request using ADAL
 
-        app.context = new Microsoft.ADAL.AuthenticationContext(authority);
-        app.context.tokenCache.readItems().then(function (items) {
-            if (items.length > 0) {
-                authority = items[0].authority;
-                app.context = new Microsoft.ADAL.AuthenticationContext(authority);
-            }
-            // Attempt to authorize user silently
-            app.context.acquireTokenSilentAsync(resourceUri, clientId)
-            .then(authCompletedCallback, function () {
-                // We require user cridentials so triggers authentication dialog
-                app.context.acquireTokenAsync(resourceUri, clientId, redirectUri)
-                .then(authCompletedCallback, function (err) {
-                    app.error("Failed to authenticate: " + err);
-                });
-            });
-        });
+    // TODO: Call the Azure AD Graph API using the token acquired above.
 
-    },
-    // Makes Api call to receive user list.
-    requestData: function (authResult, searchText) {
-        var req = new XMLHttpRequest();
-        var url = resourceUri + "/" + authResult.tenantId + "/users?api-version=" + graphApiVersion;
-        url = searchText ? url + "&$filter=mailNickname eq '" + searchText + "'" : url + "&$top=10";
-
-        req.open("GET", url, true);
-        req.setRequestHeader('Authorization', 'Bearer ' + authResult.accessToken);
-
-        req.onload = function(e) {
-            if (e.target.status >= 200 && e.target.status < 300) {
-                app.renderData(JSON.parse(e.target.response));
-                return;
-            }
-            app.error('Data request failed: ' + e.target.response);
-        };
-        req.onerror = function(e) {
-            app.error('Data request failed: ' + e.error);
-        }
-
-        req.send();
-    },
     // Renders user list.
     renderData: function(data) {
         var users = data && data.value;
